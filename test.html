@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<body>
+  <h1>kinetic arrow</h1>
+  <table>
+  <tr>
+    <td></td>
+    <td><button onclick="arrow('up')">up</button></td>
+    <td></td>
+  </tr>
+    <td><button onclick="arrow('left')">left</button></td>
+    <td></td>
+    <td><button onclick="arrow('right')">right</button></td>
+  <tr>
+  </tr>
+    <td></td>
+    <td><button onclick="arrow('down')">down</button></td>
+    <td></td>
+  <tr>
+  </tr>
+  </table>
+</body>
+<script src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+<script src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+
+<script>
+
+var ros = new ROSLIB.Ros({
+  url : 'ws://localhost:9090'
+});
+
+ros.on('connection', function(){
+  console.log('Connected to websocket server.');
+});
+
+ros.on('error', function(error){
+  console.log('Error connecting to websocket server: ', error);
+});
+
+ros.on('close', function(){
+  console.log('Connection to websocket server closed.');
+});
+
+function arrow(direction){
+  switch(direction){
+    case 'up':
+      var twist = new ROSLIB.Message({linear: {x: 0.3, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}});
+      break;
+    case 'left':
+      var twist = new ROSLIB.Message({linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.3}});
+      break;
+    case 'right':
+      var twist = new ROSLIB.Message({linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: -0.3}});
+      break;
+    case 'down':
+      var twist = new ROSLIB.Message({linear: {x: -0.3, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}});
+      break;
+    default:
+      var twist = new ROSLIB.Message({linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}});
+   }
+var cmdVel = new ROSLIB.Topic({
+  ros: ros,
+  name: '/jackal_velocity_controller/cmd_vel',
+  messageType: 'geometry_msgs/Twist'
+});
+cmdVel.publish(twist);
+  
+};
+
+function onclick_twist(){
+
+var cmdVel = new ROSLIB.Topic({
+  ros: ros,
+  name: '/jackal_velocity_controller/cmd_vel',
+  messageType: 'geometry_msgs/Twist'
+});
+
+var twist = new ROSLIB.Message({
+  linear: {
+    x: 0.1,
+    y: 0.2,
+    z: 0.3
+  },
+  angular: {
+    x: -0.1,
+    y: -0.2,
+    z: -0.3
+  }
+});
+cmdVel.publish(twist);
+}
+</script>
